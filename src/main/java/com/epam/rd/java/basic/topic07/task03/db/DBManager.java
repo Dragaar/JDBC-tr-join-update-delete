@@ -90,10 +90,14 @@ public class DBManager {
 			int[] DeletesResults = stmt.executeBatch();
 			//перевірка кількості успішних видалень та видалення DAO користувачів
 			for(int i = 0; i < DeletesResults.length; i++) {
-				if (DeletesResults[i] > 0) {
-					users[i] = null;
-				} else return false;
+				if (DeletesResults[i] == 0) {
+					rollback(con);
+					return false;
+				}
 			}
+			//окремим циклом щоб не знищити користувачів у випадку спрацювання rollback
+			for(int i = 0; i < users.length; i++){ users[i] = null; }
+
 			con.commit();
 			return true;
 		} catch (SQLException e) {
